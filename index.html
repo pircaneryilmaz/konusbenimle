@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>konuş benimle — Anonim 1 Dakikalık Sesli Eşleşme</title>
+  <style>
+    :root {
+      --bg-0: #07090f;
+      --bg-1: #0c101b;
+      --bg-2: #121827;
+      --surface: rgba(20, 27, 45, 0.78);
+      --surface-hover: rgba(28, 37, 61, 0.92);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(255, 138, 101, 0.36);
+      --text-primary: #f5f7fb;
+      --text-secondary: #9aa5be;
+      --text-muted: #65708a;
+      --accent: #ff8a65;
+      --accent-2: #ff6b8b;
+      --accent-glow: rgba(255, 138, 101, 0.28);
+      --teal: #4fd1c5;
+      --danger: #ff5c77;
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-pill: 999px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Inter, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: var(--bg-0);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      user-select: none;
+    }
+
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255, 138, 101, 0.12), transparent 48%),
+        radial-gradient(circle at 18% 82%, rgba(79, 209, 197, 0.07), transparent 45%),
+        radial-gradient(circle at 84% 76%, rgba(255, 107, 139, 0.08), transparent 45%),
+        linear-gradient(180deg, #090c14 0%, #06080d 100%);
+    }
+
+    .ambient-grid {
+      position: absolute;
+      inset: -40px;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: radial-gradient(circle at 50% 42%, black 22%, transparent 76%);
+      pointer-events: none;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100dvh;
+      max-width: 460px;
+      margin: 0 auto;
+      
