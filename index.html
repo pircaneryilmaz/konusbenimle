@@ -196,6 +196,7 @@
       border-radius: 50%;
       border: 1px solid rgba(255, 138, 101, 0.18);
       pointer-events: none;
+      transition: transform 0.12s ease-out, border-color 0.15s ease;
     }
 
     .reactor-ring.r1 {
@@ -241,11 +242,11 @@
 
     .eq-bar {
       width: 6px;
-      height: 16px;
+      height: 12px;
       border-radius: var(--radius-pill);
       background: linear-gradient(180deg, #ffbe98 0%, var(--accent) 55%, var(--accent-2) 100%);
       box-shadow: 0 0 12px rgba(255, 138, 101, 0.35);
-      transition: height 0.14s ease, opacity 0.2s ease;
+      transition: height 0.07s linear, opacity 0.18s ease;
     }
 
     .eq-bars.idle .eq-bar:nth-child(1) { height: 18px; animation: idleWave1 2.2s ease-in-out infinite; }
@@ -440,8 +441,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
-      margin-top: 8px;
+      gap: 8px;
+      margin-top: 6px;
     }
 
     .timer-pill {
@@ -481,6 +482,20 @@
       font-weight: 700;
     }
 
+    .self-nick-tag {
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      padding: 4px 11px;
+      border-radius: var(--radius-pill);
+    }
+
+    .self-nick-tag strong {
+      color: #ffd6c6;
+      font-weight: 600;
+    }
+
     .status-line {
       font-size: 13px;
       color: var(--text-secondary);
@@ -493,20 +508,20 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
+      gap: 16px;
       width: 100%;
     }
 
     .tactic-card {
       width: 100%;
-      padding: 16px 18px;
+      padding: 15px 17px;
       border-radius: var(--radius-lg);
       background: var(--surface);
       border: 1px solid var(--border);
       backdrop-filter: blur(16px);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 9px;
     }
 
     .tactic-top {
@@ -557,23 +572,23 @@
     .call-controls {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
       width: 100%;
     }
 
     .ctrl-btn {
-      height: 54px;
+      height: 50px;
       border-radius: var(--radius-pill);
       border: 1px solid var(--border);
       background: var(--surface);
       color: var(--text-primary);
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 7px;
       transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
     }
 
@@ -594,6 +609,19 @@
 
     .ctrl-btn.skip:hover {
       background: rgba(255, 255, 255, 0.1);
+    }
+
+    .ctrl-btn.home-btn {
+      grid-column: 1 / -1;
+      height: 44px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .ctrl-btn.home-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .end-center {
@@ -753,14 +781,15 @@
         <p class="match-headline">
           Şu an <span class="match-nick" id="partner-nick">Tuzlu Karamel</span> ile konuşuyorsun
         </p>
+        <div class="self-nick-tag">Senin adın: <strong id="call-my-nick">Çift Espresso</strong></div>
         <p class="status-line" id="call-status">Bağlandı • Tuzlu Karamel dinliyor</p>
       </div>
 
       <div class="call-center">
-        <div class="reactor-wrap" aria-hidden="true">
-          <div class="reactor-ring r1"></div>
-          <div class="reactor-ring r2"></div>
-          <div class="reactor-ring r3"></div>
+        <div class="reactor-wrap" id="call-reactor" aria-hidden="true">
+          <div class="reactor-ring r1" id="ring-1"></div>
+          <div class="reactor-ring r2" id="ring-2"></div>
+          <div class="reactor-ring r3" id="ring-3"></div>
           <div class="eq-bars" id="call-eq">
             <span class="eq-bar"></span>
             <span class="eq-bar"></span>
@@ -786,6 +815,9 @@
           </button>
           <button type="button" class="ctrl-btn skip" id="btn-skip">
             <span>Geç</span>
+          </button>
+          <button type="button" class="ctrl-btn home-btn" id="btn-go-home">
+            <span>Ana Sayfaya Dön</span>
           </button>
         </div>
       </div>
@@ -900,6 +932,7 @@
 
     const myNickEl = document.getElementById("my-nick");
     const searchMyNickEl = document.getElementById("search-my-nick");
+    const callMyNickEl = document.getElementById("call-my-nick");
     const partnerNickEl = document.getElementById("partner-nick");
     const callStatusEl = document.getElementById("call-status");
     const endPartnerBadgeEl = document.getElementById("end-partner-badge");
@@ -913,11 +946,15 @@
     const btnMute = document.getElementById("btn-mute");
     const muteLabelEl = document.getElementById("mute-label");
     const btnSkip = document.getElementById("btn-skip");
+    const btnGoHome = document.getElementById("btn-go-home");
     const btnEndless = document.getElementById("btn-endless");
     const btnRematch = document.getElementById("btn-rematch");
 
     const timerPillEl = document.getElementById("timer-pill");
     const callEqEl = document.getElementById("call-eq");
+    const ring1El = document.getElementById("ring-1");
+    const ring2El = document.getElementById("ring-2");
+    const ring3El = document.getElementById("ring-3");
 
     const onlineCountEls = [
       document.getElementById("home-online-count"),
@@ -931,11 +968,25 @@
     let onlineCount = 48;
     let searchTimeout = null;
     let countdownInterval = null;
-    let eqInterval = null;
+    let waveRafId = null;
     let remainingSeconds = 60;
     let isMuted = false;
     let isEndlessMode = false;
     let tacticIndex = Math.floor(Math.random() * TACTICS.length);
+
+    // Gerçek zamanlı mikrofon ses analizcisi
+    let audioCtx = null;
+    let analyser = null;
+    let micStream = null;
+    let freqData = null;
+    let micReady = false;
+    let smoothLevel = 0;
+
+    function syncMyNickLabels() {
+      myNickEl.textContent = currentMyNick;
+      searchMyNickEl.textContent = currentMyNick;
+      callMyNickEl.textContent = currentMyNick;
+    }
 
     function showScreen(name) {
       Object.values(screens).forEach((el) => el.classList.remove("active"));
@@ -955,8 +1006,7 @@
 
     function rollMyNick() {
       currentMyNick = pickRandomNick(currentMyNick);
-      myNickEl.textContent = currentMyNick;
-      searchMyNickEl.textContent = currentMyNick;
+      syncMyNickLabels();
 
       diceBtn.classList.remove("rolling");
       void diceBtn.offsetWidth;
@@ -988,28 +1038,116 @@
       }
     }
 
-    function startReactorAnimation() {
-      stopReactorAnimation();
-      const bars = callEqEl.querySelectorAll(".eq-bar");
-      eqInterval = setInterval(() => {
-        bars.forEach((bar, i) => {
-          if (isMuted) {
-            bar.style.height = "12px";
-            bar.style.opacity = "0.4";
-            return;
-          }
-          bar.style.opacity = "1";
-          const centerWeight = 1 - Math.abs(i - 3) * 0.14;
-          const h = Math.round((14 + Math.random() * 48) * centerWeight);
-          bar.style.height = `${h}px`;
+    async function initMicrophone() {
+      if (micReady && analyser) {
+        if (audioCtx && audioCtx.state === "suspended") {
+          await audioCtx.resume();
+        }
+        return true;
+      }
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          return false;
+        }
+        micStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          },
+          video: false
         });
-      }, 130);
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+        const source = audioCtx.createMediaStreamSource(micStream);
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 128;
+        analyser.smoothingTimeConstant = 0.72;
+        source.connect(analyser);
+        freqData = new Uint8Array(analyser.frequencyBinCount);
+        micReady = true;
+        return true;
+      } catch (err) {
+        micReady = false;
+        return false;
+      }
     }
 
-    function stopReactorAnimation() {
-      if (eqInterval) {
-        clearInterval(eqInterval);
-        eqInterval = null;
+    function stopMicrophone() {
+      if (micStream) {
+        micStream.getTracks().forEach((track) => track.stop());
+        micStream = null;
+      }
+      if (audioCtx) {
+        audioCtx.close().catch(() => {});
+        audioCtx = null;
+      }
+      analyser = null;
+      freqData = null;
+      micReady = false;
+      smoothLevel = 0;
+    }
+
+    function resetBarsToRest() {
+      const bars = callEqEl.querySelectorAll(".eq-bar");
+      bars.forEach((bar) => {
+        bar.style.height = "12px";
+        bar.style.opacity = isMuted ? "0.35" : "0.65";
+      });
+      if (ring3El) {
+        ring3El.style.transform = "scale(1)";
+      }
+    }
+
+    function startVoiceWaveLoop() {
+      stopVoiceWaveLoop();
+      const bars = callEqEl.querySelectorAll(".eq-bar");
+      const binIndices = [2, 4, 7, 11, 7, 4, 2];
+
+      function tick() {
+        if (isMuted || !micReady || !analyser || !freqData) {
+          smoothLevel *= 0.8;
+          resetBarsToRest();
+          waveRafId = requestAnimationFrame(tick);
+          return;
+        }
+
+        analyser.getByteFrequencyData(freqData);
+
+        // Ortalama ses enerjisini hesapla (arka plan gürültüsü için düşük eşik)
+        let sum = 0;
+        const count = Math.min(freqData.length, 32);
+        for (let i = 1; i < count; i++) {
+          sum += freqData[i];
+        }
+        const avg = sum / count;
+        const normalized = Math.max(0, Math.min(1, (avg - 14) / 85));
+        smoothLevel += (normalized - smoothLevel) * 0.35;
+
+        bars.forEach((bar, i) => {
+          const binVal = freqData[binIndices[i]] || 0;
+          const barNorm = Math.max(0, Math.min(1, (binVal - 14) / 95));
+          const combined = Math.max(barNorm, smoothLevel * 0.75);
+          const height = Math.round(12 + combined * 50);
+          bar.style.height = `${height}px`;
+          bar.style.opacity = combined > 0.04 ? "1" : "0.65";
+        });
+
+        if (ring3El) {
+          const scale = 1 + smoothLevel * 0.14;
+          ring3El.style.transform = `scale(${scale.toFixed(3)})`;
+        }
+
+        waveRafId = requestAnimationFrame(tick);
+      }
+
+      waveRafId = requestAnimationFrame(tick);
+    }
+
+    function stopVoiceWaveLoop() {
+      if (waveRafId) {
+        cancelAnimationFrame(waveRafId);
+        waveRafId = null;
       }
     }
 
@@ -1022,21 +1160,24 @@
         clearInterval(countdownInterval);
         countdownInterval = null;
       }
-      stopReactorAnimation();
+      stopVoiceWaveLoop();
     }
 
     function updateCallStatus() {
       if (isMuted) {
         callStatusEl.textContent = "Mikrofonun kapalı";
+      } else if (!micReady) {
+        callStatusEl.textContent = `Bağlandı • ${currentPartnerNick} (Mikrofon izni bekleniyor)`;
       } else {
-        callStatusEl.textContent = `Bağlandı • ${currentPartnerNick} dinliyor`;
+        callStatusEl.textContent = `Bağlandı • Konuştuğunda dalgalanır`;
       }
     }
 
-    function enterCall() {
+    async function enterCall() {
       stopTimers();
       currentPartnerNick = pickRandomNick(currentMyNick);
       partnerNickEl.textContent = currentPartnerNick;
+      syncMyNickLabels();
       endPartnerBadgeEl.textContent = `${currentPartnerNick} ile 01:00 geçti`;
       endStatusEl.textContent = "";
       isMuted = false;
@@ -1045,11 +1186,13 @@
 
       btnMute.classList.remove("muted");
       muteLabelEl.textContent = "Mikrofon";
-      updateCallStatus();
-      updateTimerDisplay();
       showNextTactic();
+      updateTimerDisplay();
       showScreen("call");
-      startReactorAnimation();
+
+      await initMicrophone();
+      updateCallStatus();
+      startVoiceWaveLoop();
 
       countdownInterval = setInterval(() => {
         if (isEndlessMode) return;
@@ -1065,26 +1208,39 @@
 
     function startSearching() {
       stopTimers();
+      syncMyNickLabels();
       showScreen("searching");
       searchTimeout = setTimeout(() => {
         enterCall();
       }, 1600);
     }
 
+    function goBackHome() {
+      stopTimers();
+      stopMicrophone();
+      isMuted = false;
+      isEndlessMode = false;
+      remainingSeconds = 60;
+      syncMyNickLabels();
+      showScreen("home");
+    }
+
     diceBtn.addEventListener("click", rollMyNick);
     btnStart.addEventListener("click", startSearching);
 
     btnCancelSearch.addEventListener("click", () => {
-      stopTimers();
-      showScreen("home");
+      goBackHome();
     });
 
     btnNextTactic.addEventListener("click", showNextTactic);
 
-    btnMute.addEventListener("click", () => {
+    btnMute.addEventListener("click", async () => {
       isMuted = !isMuted;
       btnMute.classList.toggle("muted", isMuted);
       muteLabelEl.textContent = isMuted ? "Kapalı" : "Mikrofon";
+      if (!isMuted && !micReady) {
+        await initMicrophone();
+      }
       updateCallStatus();
     });
 
@@ -1092,14 +1248,21 @@
       startSearching();
     });
 
-    btnEndless.addEventListener("click", () => {
+    btnGoHome.addEventListener("click", () => {
+      goBackHome();
+    });
+
+    btnEndless.addEventListener("click", async () => {
       isEndlessMode = true;
       endStatusEl.textContent = "Sınırsız moda geçiliyor...";
-      setTimeout(() => {
+      setTimeout(async () => {
         showScreen("call");
         updateTimerDisplay();
+        if (!micReady && !isMuted) {
+          await initMicrophone();
+        }
         callStatusEl.textContent = `Süresiz devam ediyor • ${currentPartnerNick} hatta`;
-        startReactorAnimation();
+        startVoiceWaveLoop();
       }, 500);
     });
 
@@ -1113,10 +1276,9 @@
       updateOnlineCountDisplay();
     }, 4500);
 
+    syncMyNickLabels();
     tacticTextEl.textContent = TACTICS[tacticIndex];
     updateOnlineCountDisplay();
   </script>
 </body>
 </html>
-
-    
