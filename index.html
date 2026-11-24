@@ -354,13 +354,18 @@
       transition: transform 0.16s ease, box-shadow 0.2s ease, filter 0.2s ease;
     }
 
-    .btn-primary:hover {
+    .btn-primary:hover:not(:disabled) {
       filter: brightness(1.04);
       box-shadow: 0 14px 36px rgba(255, 138, 101, 0.38);
     }
 
-    .btn-primary:active {
+    .btn-primary:active:not(:disabled) {
       transform: scale(0.98);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.65;
+      cursor: default;
     }
 
     .btn-secondary {
@@ -656,12 +661,31 @@
       color: var(--text-secondary);
     }
 
-    .end-status {
+    .end-wait-box {
       margin-top: 6px;
-      font-size: 13px;
-      color: var(--teal);
-      min-height: 18px;
-      font-weight: 500;
+      padding: 10px 16px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      font-size: 14px;
+      color: #ffd6c6;
+      font-weight: 600;
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .end-wait-box.active {
+      opacity: 1;
+    }
+
+    .end-wait-sec {
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      font-weight: 700;
     }
 
     .proto-tag {
@@ -838,10 +862,13 @@
       </header>
 
       <div class="end-center">
-        <span class="end-badge" id="end-partner-badge">Tuzlu Karamel ile 01:00 geçti</span>
+        <span class="end-badge" id="end-partner-badge">Ekşi Limon ile 01:00 geçti</span>
         <h2 class="end-title">1 dakika doldu</h2>
-        <p class="end-sub">Muhabbet sardıysa süreyi kaldırabilirsin. İkiniz de basarsanız sınırsız devam eder.</p>
-        <p class="end-status" id="end-status"></p>
+        <p class="end-sub">Muhabbet sardıysa süreyi kaldırabilirsin. İkiniz de basarsanız süresiz devam eder.</p>
+        <div class="end-wait-box" id="end-wait-box">
+          <span id="end-wait-text">Ekşi Limon'un cevabı bekleniyor</span>
+          <span class="end-wait-sec" id="end-wait-sec">10sn</span>
+        </div>
       </div>
 
       <div class="bottom-actions">
@@ -936,7 +963,9 @@
     const partnerNickEl = document.getElementById("partner-nick");
     const callStatusEl = document.getElementById("call-status");
     const endPartnerBadgeEl = document.getElementById("end-partner-badge");
-    const endStatusEl = document.getElementById("end-status");
+    const endWaitBoxEl = document.getElementById("end-wait-box");
+    const endWaitTextEl = document.getElementById("end-wait-text");
+    const endWaitSecEl = document.getElementById("end-wait-sec");
 
     const diceBtn = document.getElementById("dice-btn");
     const btnStart = document.getElementById("btn-start");
@@ -964,17 +993,19 @@
     ];
 
     let currentMyNick = "Çift Espresso";
-    let currentPartnerNick = "Tuzlu Karamel";
+    let currentPartnerNick = "Ekşi Limon";
     let onlineCount = 48;
     let searchTimeout = null;
     let countdownInterval = null;
+    let endlessWaitInterval = null;
     let waveRafId = null;
     let remainingSeconds = 60;
+    let endlessWaitSeconds = 10;
+    let isWaitingEndlessReply = false;
     let isMuted = false;
     let isEndlessMode = false;
     let tacticIndex = Math.floor(Math.random() * TACTICS.length);
 
-    // Gerçek zamanlı mikrofon ses analizcisi
     let audioCtx = null;
     let analyser = null;
     let micStream = null;
@@ -1114,7 +1145,6 @@
 
         analyser.getByteFrequencyData(freqData);
 
-        // Ortalama ses enerjisini hesapla (arka plan gürültüsü için düşük eşik)
         let sum = 0;
         const count = Math.min(freqData.length, 32);
         for (let i = 1; i < count; i++) {
@@ -1151,6 +1181,17 @@
       }
     }
 
+    function stopEndlessWait() {
+      if (endlessWaitInterval) {
+        clearInterval(endlessWaitInterval);
+        endlessWaitInterval = null;
+      }
+      isWaitingEndlessReply = false;
+      endlessWaitSeconds = 10;
+      btnEndless.disabled = false;
+      endWaitBoxEl.classList.remove("active");
+    }
+
     function stopTimers() {
       if (searchTimeout) {
         clearTimeout(searchTimeout);
@@ -1160,6 +1201,7 @@
         clearInterval(countdownInterval);
         countdownInterval = null;
       }
+      stopEndlessWait();
       stopVoiceWaveLoop();
     }
 
@@ -1173,13 +1215,21 @@
       }
     }
 
+    function openEndScreen() {
+      stopTimers();
+      stopMicrophone();
+      stopVoiceWaveLoop();
+      endPartnerBadgeEl.textContent = `${currentPartnerNick} ile 01:00 geçti`;
+      endWaitBoxEl.classList.remove("active");
+      btnEndless.disabled = false;
+      showScreen("end");
+    }
+
     async function enterCall() {
       stopTimers();
       currentPartnerNick = pickRandomNick(currentMyNick);
       partnerNickEl.textContent = currentPartnerNick;
       syncMyNickLabels();
-      endPartnerBadgeEl.textContent = `${currentPartnerNick} ile 01:00 geçti`;
-      endStatusEl.textContent = "";
       isMuted = false;
       isEndlessMode = false;
       remainingSeconds = 60;
@@ -1200,8 +1250,7 @@
         updateTimerDisplay();
 
         if (remainingSeconds <= 0) {
-          stopTimers();
-          showScreen("end");
+          openEndScreen();
         }
       }, 1000);
     }
@@ -1223,6 +1272,29 @@
       remainingSeconds = 60;
       syncMyNickLabels();
       showScreen("home");
+    }
+
+    function startEndlessReplyCountdown() {
+      if (isWaitingEndlessReply) return;
+      stopEndlessWait();
+      isWaitingEndlessReply = true;
+      endlessWaitSeconds = 10;
+      btnEndless.disabled = true;
+
+      endWaitTextEl.textContent = `${currentPartnerNick}'un cevabı bekleniyor`;
+      endWaitSecEl.textContent = `${endlessWaitSeconds}sn`;
+      endWaitBoxEl.classList.add("active");
+
+      endlessWaitInterval = setInterval(() => {
+        endlessWaitSeconds -= 1;
+        if (endlessWaitSeconds > 0) {
+          endWaitSecEl.textContent = `${endlessWaitSeconds}sn`;
+        } else {
+          endWaitSecEl.textContent = "0sn";
+          stopEndlessWait();
+          startSearching();
+        }
+      }, 1000);
     }
 
     diceBtn.addEventListener("click", rollMyNick);
@@ -1252,18 +1324,8 @@
       goBackHome();
     });
 
-    btnEndless.addEventListener("click", async () => {
-      isEndlessMode = true;
-      endStatusEl.textContent = "Sınırsız moda geçiliyor...";
-      setTimeout(async () => {
-        showScreen("call");
-        updateTimerDisplay();
-        if (!micReady && !isMuted) {
-          await initMicrophone();
-        }
-        callStatusEl.textContent = `Süresiz devam ediyor • ${currentPartnerNick} hatta`;
-        startVoiceWaveLoop();
-      }, 500);
+    btnEndless.addEventListener("click", () => {
+      startEndlessReplyCountdown();
     });
 
     btnRematch.addEventListener("click", () => {
