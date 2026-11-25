@@ -2,8 +2,8 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>konuş benimle — Anonim 1 Dakikalık Sesli Eşleşme</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>konuş benimle — Sesli Sohbet</title>
   <style>
     :root {
       --bg-0: #07090f;
@@ -37,8 +37,8 @@
 
     html, body {
       width: 100%;
-      height: 100dvh;
-      overflow: hidden;
+      min-height: 100vh;
+      min-height: 100dvh;
       background: var(--bg-0);
       color: var(--text-primary);
       font-family: var(--font-sans);
@@ -72,20 +72,22 @@
       position: relative;
       z-index: 1;
       width: 100%;
-      height: 100dvh;
+      min-height: 100vh;
+      min-height: 100dvh;
       max-width: 460px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      padding: env(safe-area-inset-top, 14px) 18px env(safe-area-inset-bottom, 18px);
+      padding: max(12px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right))
+        max(16px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
     }
 
     .screen {
       display: none;
-      flex: 1;
+      flex: 1 0 auto;
       flex-direction: column;
       justify-content: space-between;
-      height: 100%;
+      gap: 16px;
       opacity: 0;
       transform: translateY(10px) scale(0.99);
       transition: opacity 0.28s ease, transform 0.28s ease;
@@ -139,20 +141,6 @@
       font-size: 12px;
       font-weight: 600;
       color: #9ef0e8;
-    }
-
-    .live-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--teal);
-      box-shadow: 0 0 8px var(--teal);
-      animation: pulseDot 2s infinite ease-in-out;
-    }
-
-    @keyframes pulseDot {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.35); opacity: 0.65; }
     }
 
     .hero {
@@ -661,37 +649,246 @@
       color: var(--text-secondary);
     }
 
-    .end-wait-box {
-      margin-top: 6px;
-      padding: 10px 16px;
-      border-radius: var(--radius-lg);
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      font-size: 14px;
-      color: #ffd6c6;
-      font-weight: 600;
-      min-height: 42px;
-      display: inline-flex;
-      align-items: center;
+    .online-count {
+      white-space: nowrap;
+    }
+
+    .online-count::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 9px var(--teal);
+    }
+
+    .home-reactor {
+      width: clamp(88px, 17dvh, 160px);
+      height: clamp(88px, 17dvh, 160px);
+    }
+
+    .choices {
+      border: 0;
+      min-width: 0;
+      width: 100%;
+      text-align: left;
+    }
+
+    .choices legend, .room-form label {
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 8px;
+    }
+
+    .choice-grid label {
+      position: relative;
+      display: flex;
+    }
+
+    .choice-grid input {
+      position: absolute;
       opacity: 0;
-      transition: opacity 0.2s ease;
+      width: 1px;
+      height: 1px;
     }
 
-    .end-wait-box.active {
-      opacity: 1;
+    .choice-grid span {
+      width: 100%;
+      display: grid;
+      place-items: center;
+      min-height: 44px;
+      padding: 5px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      color: var(--text-secondary);
+      text-align: center;
+      font-size: 13px;
+      cursor: pointer;
     }
 
-    .end-wait-sec {
-      font-variant-numeric: tabular-nums;
-      color: var(--accent);
+    .choice-grid input:checked + span {
+      border-color: var(--border-accent);
+      color: #ffd6c6;
+      background: rgba(255, 138, 101, 0.12);
+    }
+
+    .choice-grid input:focus-visible + span {
+      outline: 2px solid var(--text-primary);
+      outline-offset: 2px;
+    }
+
+    #screen-lobby, #screen-room, #screen-create {
+      justify-content: flex-start;
+      gap: 20px;
+    }
+
+    .lobby-intro {
+      display: grid;
+      gap: 7px;
+    }
+
+    .lobby-intro h2 {
+      font-size: 30px;
+      letter-spacing: -0.035em;
+    }
+
+    .lobby-intro p, .room-meta {
+      color: var(--text-secondary);
+      line-height: 1.45;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .lobby-intro h2, .room-card h3 {
+      overflow-wrap: anywhere;
+    }
+
+    .room-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .room-card {
+      display: grid;
+      grid-template-columns: 39px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      padding: 11px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .room-icon {
+      display: grid;
+      place-items: center;
+      width: 39px;
+      height: 39px;
+      border-radius: 12px;
+      background: rgba(255, 138, 101, 0.12);
+      color: #ffd6c6;
       font-weight: 700;
     }
 
-    .proto-tag {
-      font-size: 11px;
-      color: var(--text-muted);
+    .room-card h3 {
+      font-size: 14px;
+    }
+
+    .room-card p {
+      margin-top: 4px;
+      font-size: 12px;
+    }
+
+    .small-action {
+      min-height: 44px;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      background: var(--surface);
+      color: var(--text-primary);
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .room-form, .room-form label, .room-share {
+      display: grid;
+      gap: 8px;
+    }
+
+    .room-field {
+      width: 100%;
+      min-height: 44px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      color: var(--text-primary);
+      font: inherit;
+      color-scheme: dark;
+      user-select: text;
+    }
+
+    .room-share[hidden] {
+      display: none;
+    }
+
+    .room-listeners {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      display: grid;
+      gap: 8px;
+    }
+
+    .room-listeners h3 {
+      font-size: 14px;
+    }
+
+    .room-listeners ul {
+      padding-left: 18px;
+    }
+
+    .end-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .end-actions button {
+      height: auto;
+      min-height: 44px;
+      padding: 7px;
+    }
+
+    .end-feedback {
+      display: grid;
+      gap: 6px;
       text-align: center;
+    }
+
+    .feedback-actions {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .feedback-actions button[aria-pressed="true"] {
+      border-color: var(--border-accent);
+      color: #ffd6c6;
+    }
+
+    .screen:focus {
+      outline: none;
+    }
+
+    @media (max-height: 650px) {
+      .screen, .call-center, .hero {
+        gap: 12px;
+      }
+
+      .reactor-wrap {
+        width: 104px;
+        height: 104px;
+        margin: 0;
+      }
+
+      .call-header {
+        gap: 5px;
+        margin-top: 0;
+      }
+
+      .tactic-card {
+        padding: 10px 12px;
+      }
     }
   </style>
 </head>
@@ -701,23 +898,20 @@
   </div>
 
   <main class="app">
-    <section id="screen-home" class="screen active" aria-label="Giriş Ekranı">
+    <section id="screen-home" class="screen active" tabindex="-1" aria-label="Giriş Ekranı">
       <header class="top-bar">
         <div class="badge">
           <span class="badge-dot"></span>
           <span>ANONİM • KAYIT YOK</span>
         </div>
-        <div class="live-pill">
-          <span class="live-dot"></span>
-          <span id="home-online-count">48 kişi hatta</span>
-        </div>
+        <div class="live-pill online-count">48 kişi hatta</div>
       </header>
 
       <div class="hero">
         <h1 class="brand-title">konuş benimle</h1>
-        <p class="hero-sub">İsim yok. Fotoğraf yok. Sadece 1 dakikalık kör bir sohbet.</p>
+        <p class="hero-sub">Bazen hiç tanımadığın biriyle konuşmak iyi gelir.</p>
 
-        <div class="reactor-wrap" aria-hidden="true">
+        <div class="reactor-wrap home-reactor" aria-hidden="true">
           <div class="reactor-ring r1"></div>
           <div class="reactor-ring r2"></div>
           <div class="reactor-ring r3"></div>
@@ -731,6 +925,16 @@
             <span class="eq-bar"></span>
           </div>
         </div>
+
+        <fieldset class="choices">
+          <legend>Bugün ne konuşmak istersin?</legend>
+          <div class="choice-grid" id="categories">
+            <label><input type="radio" name="category" value="Surpriz" checked><span>Sürpriz</span></label>
+            <label><input type="radio" name="category" value="Gece"><span>Gece sohbeti</span></label>
+            <label><input type="radio" name="category" value="Oyun"><span>Sesli oyunlar</span></label>
+            <label><input type="radio" name="category" value="Gun"><span>Günün konusu</span></label>
+          </div>
+        </fieldset>
 
         <div class="nick-card">
           <div class="nick-info">
@@ -752,20 +956,18 @@
 
       <div class="bottom-actions">
         <button type="button" class="btn-primary" id="btn-start">Biriyle Konuş</button>
-        <p class="helper-note">Mikrofon izni istenir • İstediğin an geçebilirsin</p>
+        <button type="button" class="btn-secondary" id="btn-lobbies">Lobileri Keşfet</button>
+        <p class="helper-note">Demo • Eşleşmeler, kişiler ve oda dolulukları örnektir.</p>
       </div>
     </section>
 
-    <section id="screen-searching" class="screen" aria-label="Arama Ekranı">
+    <section id="screen-searching" class="screen" tabindex="-1" aria-label="Arama Ekranı">
       <header class="top-bar">
         <div class="badge">
           <span class="badge-dot"></span>
           <span id="search-my-nick">Çift Espresso</span>
         </div>
-        <div class="live-pill">
-          <span class="live-dot"></span>
-          <span id="search-online-count">48 kişi hatta</span>
-        </div>
+        <div class="live-pill online-count">48 kişi hatta</div>
       </header>
 
       <div class="searching-center">
@@ -779,8 +981,9 @@
             <span class="eq-bar"></span>
           </div>
         </div>
-        <h2 class="searching-title">Bir ses aranıyor...</h2>
-        <p class="searching-sub">Frekans eşleşmesi kuruluyor</p>
+        <h2 class="searching-title">Demo eşi aranıyor…</h2>
+        <p class="searching-sub">Örnek sohbet hazırlanıyor.</p>
+        <p class="room-meta" id="search-topic"></p>
       </div>
 
       <div class="bottom-actions">
@@ -788,25 +991,22 @@
       </div>
     </section>
 
-    <section id="screen-call" class="screen" aria-label="Canlı Sohbet Ekranı">
+    <section id="screen-call" class="screen" tabindex="-1" aria-label="Demo Sohbet Ekranı">
       <header class="top-bar">
         <div class="badge">
           <span class="badge-dot"></span>
           <span>ANONİM • KAYIT YOK</span>
         </div>
-        <div class="live-pill">
-          <span class="live-dot"></span>
-          <span id="call-online-count">48 kişi hatta</span>
-        </div>
+        <div class="live-pill online-count">48 kişi hatta</div>
       </header>
 
       <div class="call-header">
-        <div class="timer-pill" id="timer-pill">01:00</div>
+        <div class="timer-pill" id="timer-pill" role="timer" aria-label="Kalan süre">01:00</div>
         <p class="match-headline">
-          Şu an <span class="match-nick" id="partner-nick">Tuzlu Karamel</span> ile konuşuyorsun
+          Demo eşi <span class="match-nick" id="partner-nick"></span>
         </p>
         <div class="self-nick-tag">Senin adın: <strong id="call-my-nick">Çift Espresso</strong></div>
-        <p class="status-line" id="call-status">Bağlandı • Tuzlu Karamel dinliyor</p>
+        <p class="status-line" id="call-status" role="status">Mikrofon kapalı.</p>
       </div>
 
       <div class="call-center">
@@ -827,7 +1027,7 @@
 
         <div class="tactic-card">
           <div class="tactic-top">
-            <span class="tactic-label">SOHBET İLERLEMİYOR? TAKTİK:</span>
+            <span class="tactic-label" id="icebreaker-label">Buz kırıcı</span>
             <button type="button" class="tactic-swap" id="btn-next-tactic">Değiştir</button>
           </div>
           <p class="tactic-text" id="tactic-text"></p>
@@ -835,7 +1035,7 @@
 
         <div class="call-controls">
           <button type="button" class="ctrl-btn" id="btn-mute">
-            <span id="mute-label">Mikrofon</span>
+            <span id="mute-label">Mikrofonu Aç</span>
           </button>
           <button type="button" class="ctrl-btn skip" id="btn-skip">
             <span>Geç</span>
@@ -846,34 +1046,104 @@
         </div>
       </div>
 
-      <p class="proto-tag">konuş benimle • Arayüz Önizleme Prototipi</p>
     </section>
 
-    <section id="screen-end" class="screen" aria-label="Süre Doldu Ekranı">
+    <section id="screen-end" class="screen" tabindex="-1" aria-label="Süre Doldu Ekranı">
       <header class="top-bar">
         <div class="badge">
           <span class="badge-dot"></span>
           <span>SÜRE TAMAMLANDI</span>
         </div>
-        <div class="live-pill">
-          <span class="live-dot"></span>
-          <span id="end-online-count">48 kişi hatta</span>
-        </div>
+        <div class="live-pill online-count">48 kişi hatta</div>
       </header>
 
       <div class="end-center">
-        <span class="end-badge" id="end-partner-badge">Ekşi Limon ile 01:00 geçti</span>
-        <h2 class="end-title">1 dakika doldu</h2>
-        <p class="end-sub">Muhabbet sardıysa süreyi kaldırabilirsin. İkiniz de basarsanız süresiz devam eder.</p>
-        <div class="end-wait-box" id="end-wait-box">
-          <span id="end-wait-text">Ekşi Limon'un cevabı bekleniyor</span>
-          <span class="end-wait-sec" id="end-wait-sec">10sn</span>
+        <span class="end-badge" id="end-partner-badge"></span>
+        <h2 class="end-title">Süre doldu</h2>
+        <p class="end-sub">30 saniye daha, süresiz devam veya yeniden sohbet seçeneklerinde demo eşinin onayı canlandırılır.</p>
+      </div>
+
+      <div class="end-feedback" aria-label="Anonim sohbet değerlendirmesi">
+        <p class="room-meta" id="feedback-message" aria-live="polite">Demo sohbeti nasıldı?</p>
+        <div class="feedback-actions">
+          <button type="button" class="small-action" data-feedback="İyiydi" aria-pressed="false">İyiydi</button>
+          <button type="button" class="small-action" data-feedback="Fena değildi" aria-pressed="false">Fena değildi</button>
+          <button type="button" class="small-action" data-feedback="Zordu" aria-pressed="false">Zordu</button>
         </div>
       </div>
 
       <div class="bottom-actions">
-        <button type="button" class="btn-primary" id="btn-endless">Süresiz Devam Et</button>
-        <button type="button" class="btn-secondary" id="btn-rematch">Yeni Biriyle Eşleş</button>
+        <button type="button" class="btn-primary" id="btn-extra">30 Saniye Daha</button>
+        <div class="end-actions">
+          <button type="button" class="btn-secondary" id="btn-endless">Süresiz Devam Et</button>
+          <button type="button" class="btn-secondary" id="btn-repeat">Tekrar Konuş</button>
+          <button type="button" class="btn-secondary" id="btn-rematch">Yeni Demo Eşi</button>
+          <button type="button" class="btn-secondary" id="btn-end-home">Ana Sayfaya Dön</button>
+        </div>
+      </div>
+    </section>
+    <section id="screen-lobby" class="screen" tabindex="-1" aria-label="Lobiler">
+      <header class="top-bar">
+        <button type="button" class="small-action" id="btn-lobby-home">Ana Sayfa</button>
+        <div class="live-pill online-count">48 kişi hatta</div>
+      </header>
+      <div class="lobby-intro">
+        <h2>Sesli lobiler</h2>
+        <p>Bir odaya dinleyici olarak katıl ya da arkadaşlarına özel bir oda aç.</p>
+      </div>
+      <div class="room-list" id="room-list"></div>
+      <div class="bottom-actions">
+        <button type="button" class="btn-primary" id="btn-create-room">Özel Oda Oluştur</button>
+        <p class="helper-note">Demo • Oda dolulukları ve konuşmacılar örnektir.</p>
+      </div>
+    </section>
+
+    <section id="screen-create" class="screen" tabindex="-1" aria-label="Özel Oda Oluştur">
+      <header class="top-bar">
+        <button type="button" class="small-action" id="btn-create-back">Lobilere Dön</button>
+        <div class="live-pill online-count">48 kişi hatta</div>
+      </header>
+      <div class="lobby-intro">
+        <h2>Özel oda oluştur</h2>
+        <p>Oda adını ve kapasiteyi seç. Oluşan bağlantı bu demo odasını açar.</p>
+      </div>
+      <form class="room-form" id="room-form">
+        <label>Oda adı
+          <input class="room-field" id="room-name-input" maxlength="40" required autocomplete="off" placeholder="Örn. Gece Kahvesi">
+        </label>
+        <label>Kapasite
+          <select class="room-field" id="room-capacity-input">
+            <option value="4">4 kişi</option>
+            <option value="8" selected>8 kişi</option>
+            <option value="12">12 kişi</option>
+            <option value="20">20 kişi</option>
+          </select>
+        </label>
+        <button class="btn-primary" type="submit">Odayı Oluştur</button>
+      </form>
+    </section>
+
+    <section id="screen-room" class="screen" tabindex="-1" aria-label="Oda">
+      <header class="top-bar">
+        <button type="button" class="small-action" id="btn-leave-room">Odadan Çık</button>
+        <div class="live-pill online-count">48 kişi hatta</div>
+      </header>
+      <div class="lobby-intro">
+        <h2 id="room-title"></h2>
+        <p class="room-meta" id="room-detail"></p>
+        <p id="room-mode" role="status"></p>
+      </div>
+      <div class="room-listeners">
+        <h3>Odadaki kişiler</h3>
+        <ul class="room-meta" id="room-people"></ul>
+      </div>
+      <p class="room-meta" role="status" id="room-mic-status">Mikrofon kapalı.</p>
+      <button type="button" class="btn-secondary" id="btn-room-mic"><span id="room-mic-label">Mikrofonu Aç</span></button>
+      <div class="room-share" id="room-share" hidden>
+        <label for="room-link">Özel oda bağlantısı</label>
+        <input class="room-field" id="room-link" readonly>
+        <button type="button" class="btn-secondary" id="btn-copy-room">Bağlantıyı Kopyala</button>
+        <p class="room-meta" id="room-copy-status" role="status"></p>
       </div>
     </section>
   </main>
@@ -954,7 +1224,10 @@
       home: document.getElementById("screen-home"),
       searching: document.getElementById("screen-searching"),
       call: document.getElementById("screen-call"),
-      end: document.getElementById("screen-end")
+      end: document.getElementById("screen-end"),
+      lobby: document.getElementById("screen-lobby"),
+      create: document.getElementById("screen-create"),
+      room: document.getElementById("screen-room")
     };
 
     const myNickEl = document.getElementById("my-nick");
@@ -963,9 +1236,6 @@
     const partnerNickEl = document.getElementById("partner-nick");
     const callStatusEl = document.getElementById("call-status");
     const endPartnerBadgeEl = document.getElementById("end-partner-badge");
-    const endWaitBoxEl = document.getElementById("end-wait-box");
-    const endWaitTextEl = document.getElementById("end-wait-text");
-    const endWaitSecEl = document.getElementById("end-wait-sec");
 
     const diceBtn = document.getElementById("dice-btn");
     const btnStart = document.getElementById("btn-start");
@@ -981,36 +1251,43 @@
 
     const timerPillEl = document.getElementById("timer-pill");
     const callEqEl = document.getElementById("call-eq");
-    const ring1El = document.getElementById("ring-1");
-    const ring2El = document.getElementById("ring-2");
     const ring3El = document.getElementById("ring-3");
 
-    const onlineCountEls = [
-      document.getElementById("home-online-count"),
-      document.getElementById("search-online-count"),
-      document.getElementById("call-online-count"),
-      document.getElementById("end-online-count")
+    const byId = (id) => document.getElementById(id);
+    const onlineCounts = document.querySelectorAll(".online-count");
+    const roomMicButton = byId("btn-room-mic");
+    const roomList = byId("room-list");
+    const ROOM_CAPACITIES = [4, 8, 12, 20];
+    const rooms = [
+      { name: "Gece Kahvesi", topic: "Günün yorgunluğunu sesli at", icon: "G", people: 8, capacity: 12, speakers: ["Soğuk Kahve", "Buzlu Şeftali"] },
+      { name: "İtiraf Odası", topic: "Anlatmak istediklerin için", icon: "İ", people: 5, capacity: 8, speakers: ["Tuzlu Karamel", "Tarçınlı Rulo"] },
+      { name: "Sesli Oyunlar", topic: "Hızlı sorular ve küçük meydan okumalar", icon: "O", people: 6, capacity: 12, speakers: ["Çıtır Simit", "Çilekli Soda"] },
+      { name: "Günün Konusu", topic: "Birlikte konuşulacak günlük soru", icon: "K", people: 4, capacity: 8, speakers: ["Ekşi Limon", "Ballı Süt"] }
     ];
-
-    let currentMyNick = "Çift Espresso";
-    let currentPartnerNick = "Ekşi Limon";
+    const topics = {
+      Surpriz: { label: "Sürpriz", prompts: TACTICS },
+      Gece: { label: "Gece sohbeti", prompts: ["Günün hangi anını tekrar yaşamak isterdin?", "Bir gece yürüyüşünün müziği ne olurdu?", "Şu an biri seni dinlese ne anlatırdın?"] },
+      Oyun: { label: "Sesli oyunlar", prompts: ["İki doğru, bir yanlış söyle. Hangisi yanlış?", "30 saniyede aklına gelen üç film adı söyle.", "Bir nesne düşün. Karşındaki kişi üç soruyla tahmin etsin."] },
+      Gun: { label: "Günün konusu", prompts: ["Bugün seni gülümseten küçük şey neydi?", "Bir şehre ikinci bir isim versen ne olurdu?", "Bugün birine hangi soruyu sormak isterdin?"] }
+    };
     let onlineCount = 48;
+    let selectedTopic = "Surpriz";
+    let currentRoom = null;
+    let quietSince = null;
+    let silencePromptShown = false;
+
+    const CALL_SECONDS = 60;
+    let currentMyNick = "Çift Espresso";
+    let currentPartnerNick = "";
     let searchTimeout = null;
     let countdownInterval = null;
-    let endlessWaitInterval = null;
+    let callDeadline = null;
     let waveRafId = null;
-    let remainingSeconds = 60;
-    let endlessWaitSeconds = 10;
-    let isWaitingEndlessReply = false;
-    let isMuted = false;
-    let isEndlessMode = false;
-    let tacticIndex = Math.floor(Math.random() * TACTICS.length);
+    let tacticIndex = -1;
 
-    let audioCtx = null;
-    let analyser = null;
-    let micStream = null;
-    let freqData = null;
-    let micReady = false;
+    let pendingMicrophone = null;
+    let microphone = null;
+    let isMuted = false;
     let smoothLevel = 0;
 
     function syncMyNickLabels() {
@@ -1022,12 +1299,8 @@
     function showScreen(name) {
       Object.values(screens).forEach((el) => el.classList.remove("active"));
       screens[name].classList.add("active");
-    }
-
-    function updateOnlineCountDisplay() {
-      onlineCountEls.forEach((el) => {
-        if (el) el.textContent = `${onlineCount} kişi hatta`;
-      });
+      screens[name].focus({ preventScroll: true });
+      window.scrollTo(0, 0);
     }
 
     function pickRandomNick(excludeNick) {
@@ -1045,8 +1318,9 @@
     }
 
     function showNextTactic() {
-      tacticIndex = (tacticIndex + 1) % TACTICS.length;
-      tacticTextEl.textContent = TACTICS[tacticIndex];
+      const prompts = topics[selectedTopic].prompts;
+      tacticIndex = (tacticIndex + 1) % prompts.length;
+      tacticTextEl.textContent = prompts[tacticIndex];
     }
 
     function formatTime(sec) {
@@ -1056,67 +1330,115 @@
     }
 
     function updateTimerDisplay() {
-      if (isEndlessMode) {
+      if (callDeadline === null) {
         timerPillEl.textContent = "∞";
         timerPillEl.classList.remove("urgent");
         return;
       }
-      timerPillEl.textContent = formatTime(remainingSeconds);
-      if (remainingSeconds <= 10 && remainingSeconds > 0) {
-        timerPillEl.classList.add("urgent");
-      } else {
-        timerPillEl.classList.remove("urgent");
+
+      const seconds = Math.max(0, Math.ceil((callDeadline - Date.now()) / 1000));
+      const time = formatTime(seconds);
+      if (timerPillEl.textContent !== time) timerPillEl.textContent = time;
+      timerPillEl.classList.toggle("urgent", seconds > 0 && seconds <= 10);
+      if (seconds === 0) openEndScreen();
+    }
+
+    function setMicrophoneStatus(message, label, disabled = false) {
+      const inRoom = screens.room.classList.contains("active");
+      const button = inRoom ? roomMicButton : btnMute;
+      (inRoom ? byId("room-mic-status") : callStatusEl).textContent = message;
+      (inRoom ? byId("room-mic-label") : muteLabelEl).textContent = label;
+      button.disabled = disabled;
+      button.classList.toggle("muted", isMuted);
+      if (inRoom) updateRoomMode();
+    }
+
+    function microphoneError(error) {
+      switch (error.name) {
+        case "NotAllowedError":
+        case "SecurityError":
+          return "Mikrofon izni verilmedi. Site izinlerini kontrol edip tekrar dene.";
+        case "NotFoundError":
+          return "Mikrofon bulunamadı. Bir mikrofon bağlayıp tekrar dene.";
+        case "NotReadableError":
+        case "AbortError":
+          return "Mikrofon kullanılamıyor. Başka bir uygulama kullanıyorsa kapatıp tekrar dene.";
+        default:
+          return "Mikrofon açılamadı. Tekrar deneyebilirsin.";
+      }
+    }
+
+    function releaseMicrophone(input) {
+      if (input?.stream) input.stream.getTracks().forEach((track) => track.stop());
+      if (input?.context && input.context.state !== "closed") {
+        input.context.close().catch(() => {});
       }
     }
 
     async function initMicrophone() {
-      if (micReady && analyser) {
-        if (audioCtx && audioCtx.state === "suspended") {
-          await audioCtx.resume();
-        }
-        return true;
+      if (pendingMicrophone ||
+          (!screens.call.classList.contains("active") && !screens.room.classList.contains("active"))) return;
+
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!navigator.mediaDevices?.getUserMedia || !AudioContextClass) {
+        setMicrophoneStatus("Mikrofon bu tarayıcıda kullanılamıyor. Sayfayı HTTPS üzerinden açmayı dene.", "Mikrofonu Aç");
+        return;
       }
+
+      const input = {};
+      pendingMicrophone = input;
+      setMicrophoneStatus("Tarayıcı mikrofon izni bekleniyor.", "İzin Bekleniyor", true);
+
       try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          return false;
-        }
-        micStream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true
-          },
+        input.context = new AudioContextClass();
+        // Start inside the button gesture, before the browser's permission prompt.
+        const resumed = input.context.resume().then(() => true, () => false);
+        input.stream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
           video: false
         });
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new AudioContextClass();
-        const source = audioCtx.createMediaStreamSource(micStream);
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 128;
-        analyser.smoothingTimeConstant = 0.72;
-        source.connect(analyser);
-        freqData = new Uint8Array(analyser.frequencyBinCount);
-        micReady = true;
-        return true;
-      } catch (err) {
-        micReady = false;
-        return false;
+        if (pendingMicrophone !== input) {
+          releaseMicrophone(input);
+          return;
+        }
+        if (!(await resumed)) throw new Error("AudioContext could not start");
+        if (pendingMicrophone !== input) return;
+
+        input.analyser = input.context.createAnalyser();
+        input.analyser.fftSize = 128;
+        input.analyser.smoothingTimeConstant = 0.72;
+        input.context.createMediaStreamSource(input.stream).connect(input.analyser);
+        input.freqData = new Uint8Array(input.analyser.frequencyBinCount);
+
+        pendingMicrophone = null;
+        microphone = input;
+        input.stream.getAudioTracks().forEach((track) => {
+          track.addEventListener("ended", () => {
+            if (microphone !== input) return;
+            stopMicrophone();
+            setMicrophoneStatus("Mikrofon bağlantısı kesildi. Tekrar açabilirsin.", "Tekrar Dene");
+          }, { once: true });
+        });
+        markMicrophoneActive();
+      } catch (error) {
+        releaseMicrophone(input);
+        if (pendingMicrophone !== input) return;
+        pendingMicrophone = null;
+        setMicrophoneStatus(microphoneError(error), "Tekrar Dene");
       }
     }
 
     function stopMicrophone() {
-      if (micStream) {
-        micStream.getTracks().forEach((track) => track.stop());
-        micStream = null;
-      }
-      if (audioCtx) {
-        audioCtx.close().catch(() => {});
-        audioCtx = null;
-      }
-      analyser = null;
-      freqData = null;
-      micReady = false;
+      const pending = pendingMicrophone;
+      pendingMicrophone = null;
+      releaseMicrophone(pending);
+      releaseMicrophone(microphone);
+      microphone = null;
+      isMuted = false;
       smoothLevel = 0;
+      quietSince = null;
+      stopVoiceWaveLoop();
+      resetBarsToRest();
     }
 
     function resetBarsToRest() {
@@ -1136,12 +1458,8 @@
       const binIndices = [2, 4, 7, 11, 7, 4, 2];
 
       function tick() {
-        if (isMuted || !micReady || !analyser || !freqData) {
-          smoothLevel *= 0.8;
-          resetBarsToRest();
-          waveRafId = requestAnimationFrame(tick);
-          return;
-        }
+        if (isMuted || !microphone) return;
+        const { analyser, freqData } = microphone;
 
         analyser.getByteFrequencyData(freqData);
 
@@ -1151,6 +1469,14 @@
           sum += freqData[i];
         }
         const avg = sum / count;
+        if (avg >= 15) quietSince = null;
+        if (avg < 15 && quietSince === null) quietSince = Date.now();
+        if (quietSince !== null && Date.now() - quietSince >= 8000 && !silencePromptShown) {
+          silencePromptShown = true;
+          byId("icebreaker-label").textContent = "Sessizlikte yeni soru";
+          showNextTactic();
+        }
+
         const normalized = Math.max(0, Math.min(1, (avg - 14) / 85));
         smoothLevel += (normalized - smoothLevel) * 0.35;
 
@@ -1175,172 +1501,251 @@
     }
 
     function stopVoiceWaveLoop() {
-      if (waveRafId) {
+      if (waveRafId !== null) {
         cancelAnimationFrame(waveRafId);
         waveRafId = null;
       }
     }
 
-    function stopEndlessWait() {
-      if (endlessWaitInterval) {
-        clearInterval(endlessWaitInterval);
-        endlessWaitInterval = null;
-      }
-      isWaitingEndlessReply = false;
-      endlessWaitSeconds = 10;
-      btnEndless.disabled = false;
-      endWaitBoxEl.classList.remove("active");
-    }
-
-    function stopTimers() {
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-        searchTimeout = null;
-      }
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-      }
-      stopEndlessWait();
-      stopVoiceWaveLoop();
-    }
-
-    function updateCallStatus() {
-      if (isMuted) {
-        callStatusEl.textContent = "Mikrofonun kapalı";
-      } else if (!micReady) {
-        callStatusEl.textContent = `Bağlandı • ${currentPartnerNick} (Mikrofon izni bekleniyor)`;
-      } else {
-        callStatusEl.textContent = `Bağlandı • Konuştuğunda dalgalanır`;
-      }
+    function leaveSession() {
+      clearTimeout(searchTimeout);
+      clearInterval(countdownInterval);
+      searchTimeout = null;
+      countdownInterval = null;
+      callDeadline = null;
+      stopMicrophone();
     }
 
     function openEndScreen() {
-      stopTimers();
-      stopMicrophone();
-      stopVoiceWaveLoop();
-      endPartnerBadgeEl.textContent = `${currentPartnerNick} ile 01:00 geçti`;
-      endWaitBoxEl.classList.remove("active");
-      btnEndless.disabled = false;
+      leaveSession();
+      endPartnerBadgeEl.textContent = `${currentPartnerNick} ile demo tamamlandı`;
+      byId("feedback-message").textContent = "Demo sohbeti nasıldı?";
+      document.querySelectorAll("[data-feedback]").forEach((button) => button.setAttribute("aria-pressed", "false"));
       showScreen("end");
     }
 
-    async function enterCall() {
-      stopTimers();
-      currentPartnerNick = pickRandomNick(currentMyNick);
+    function openCall(seconds = CALL_SECONDS) {
+      callDeadline = seconds === null ? null : Date.now() + seconds * 1000;
       partnerNickEl.textContent = currentPartnerNick;
-      syncMyNickLabels();
-      isMuted = false;
-      isEndlessMode = false;
-      remainingSeconds = 60;
-
-      btnMute.classList.remove("muted");
-      muteLabelEl.textContent = "Mikrofon";
-      showNextTactic();
-      updateTimerDisplay();
+      byId("icebreaker-label").textContent = "Buz kırıcı";
+      silencePromptShown = false;
       showScreen("call");
+      setMicrophoneStatus("Mikrofon kapalı.", "Mikrofonu Aç");
+      updateTimerDisplay();
 
-      await initMicrophone();
-      updateCallStatus();
-      startVoiceWaveLoop();
-
-      countdownInterval = setInterval(() => {
-        if (isEndlessMode) return;
-        remainingSeconds -= 1;
-        updateTimerDisplay();
-
-        if (remainingSeconds <= 0) {
-          openEndScreen();
-        }
-      }, 1000);
+      if (seconds !== null) countdownInterval = setInterval(updateTimerDisplay, 250);
     }
 
     function startSearching() {
-      stopTimers();
-      syncMyNickLabels();
+      leaveSession();
+      selectedTopic = document.querySelector('input[name="category"]:checked').value;
+      byId("search-topic").textContent = topics[selectedTopic].label;
       showScreen("searching");
       searchTimeout = setTimeout(() => {
-        enterCall();
+        searchTimeout = null;
+        currentPartnerNick = pickRandomNick(currentMyNick);
+        tacticIndex = selectedTopic === "Gun"
+          ? Math.floor(Date.now() / 86400000) % topics.Gun.prompts.length - 1
+          : Math.floor(Math.random() * topics[selectedTopic].prompts.length) - 1;
+        showNextTactic();
+        openCall();
       }, 1600);
     }
 
     function goBackHome() {
-      stopTimers();
-      stopMicrophone();
-      isMuted = false;
-      isEndlessMode = false;
-      remainingSeconds = 60;
-      syncMyNickLabels();
+      leaveSession();
       showScreen("home");
     }
 
-    function startEndlessReplyCountdown() {
-      if (isWaitingEndlessReply) return;
-      stopEndlessWait();
-      isWaitingEndlessReply = true;
-      endlessWaitSeconds = 10;
-      btnEndless.disabled = true;
-
-      endWaitTextEl.textContent = `${currentPartnerNick}'un cevabı bekleniyor`;
-      endWaitSecEl.textContent = `${endlessWaitSeconds}sn`;
-      endWaitBoxEl.classList.add("active");
-
-      endlessWaitInterval = setInterval(() => {
-        endlessWaitSeconds -= 1;
-        if (endlessWaitSeconds > 0) {
-          endWaitSecEl.textContent = `${endlessWaitSeconds}sn`;
-        } else {
-          endWaitSecEl.textContent = "0sn";
-          stopEndlessWait();
-          startSearching();
-        }
-      }, 1000);
+    function markMicrophoneActive() {
+      const inRoom = screens.room.classList.contains("active");
+      const message = inRoom ? "Mikrofon açık. Bu odada ses aktarımı canlandırılır."
+        : "Mikrofon açık. Ses düzeyini burada görebilirsin.";
+      setMicrophoneStatus(message, "Sustur");
+      if (!inRoom) startVoiceWaveLoop();
     }
+
+    function toggleMicrophone() {
+      if (!microphone) {
+        void initMicrophone();
+        return;
+      }
+
+      isMuted = !isMuted;
+      microphone.stream.getAudioTracks().forEach((track) => { track.enabled = !isMuted; });
+      if (isMuted) {
+        stopVoiceWaveLoop();
+        quietSince = null;
+        smoothLevel = 0;
+        resetBarsToRest();
+        setMicrophoneStatus("Mikrofon susturuldu.", "Sesi Aç");
+      } else {
+        markMicrophoneActive();
+      }
+    }
+
+    function openLobby() {
+      leaveSession();
+      currentRoom = null;
+      if (location.hash.startsWith("#oda=")) {
+        history.replaceState(null, "", location.pathname + location.search);
+      }
+      showScreen("lobby");
+    }
+
+    function addRoomCard(room) {
+      const card = document.createElement("article");
+      card.className = "room-card";
+      const icon = document.createElement("span");
+      icon.className = "room-icon";
+      icon.setAttribute("aria-hidden", "true");
+      icon.textContent = room.icon;
+      const details = document.createElement("div");
+      const heading = document.createElement("h3");
+      heading.textContent = room.name;
+      const meta = document.createElement("p");
+      meta.className = "room-meta";
+      meta.textContent = `${room.people}/${room.capacity} kişi · ${room.topic}`;
+      details.append(heading, meta);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "small-action";
+      button.textContent = "Dinle";
+      button.setAttribute("aria-label", `${room.name} odasını dinle`);
+      button.addEventListener("click", () => openRoom(room));
+      card.append(icon, details, button);
+      roomList.append(card);
+    }
+
+    function updateRoomMode() {
+      const speaker = Boolean(microphone && !isMuted);
+      byId("room-mode").textContent = speaker ? "Konuşmacı olarak katıldın" : "Dinleyici olarak katıldın";
+      const names = [...currentRoom.speakers, `${currentMyNick} (sen)`];
+      const list = byId("room-people");
+      list.replaceChildren();
+      for (const name of names) {
+        const item = document.createElement("li");
+        item.textContent = name;
+        list.append(item);
+      }
+      const others = currentRoom.people - currentRoom.speakers.length;
+      if (others > 0) {
+        const item = document.createElement("li");
+        item.textContent = `+${others} dinleyici`;
+        list.append(item);
+      }
+    }
+
+    function openRoom(room) {
+      leaveSession();
+      currentRoom = room;
+      byId("room-title").textContent = room.name;
+      byId("room-detail").textContent = `${room.people + 1}/${room.capacity} kişi · ${room.topic} · Demo`;
+      byId("room-share").hidden = !room.code;
+      byId("room-copy-status").textContent = "";
+      if (room.code) {
+        const url = new URL(location.href);
+        url.hash = "oda=" + encodeURIComponent(JSON.stringify([room.code, room.name, room.capacity]));
+        byId("room-link").value = url.href;
+      }
+      showScreen("room");
+      setMicrophoneStatus("Mikrofon kapalı.", "Mikrofonu Aç");
+    }
+
+    function privateRoom(code, name, capacity) {
+      return { code, name, capacity, topic: "Özel oda", people: 0, speakers: [] };
+    }
+
+    function openSharedRoom() {
+      const fragment = location.hash;
+      if (!fragment.startsWith("#oda=") || fragment.length > 1000) return;
+      try {
+        const [code, name, capacity] = JSON.parse(decodeURIComponent(fragment.slice(5)));
+        if (typeof code === "string" && /^[a-f0-9-]{36}$/.test(code) &&
+            typeof name === "string" && name.trim() && name.length <= 40 &&
+            ROOM_CAPACITIES.includes(capacity)) {
+          openRoom(privateRoom(code, name.trim(), capacity));
+        }
+      } catch {
+        // A malformed invitation leaves the current screen usable.
+      }
+    }
+
+    byId("room-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const name = byId("room-name-input").value.trim();
+      if (!name) {
+        byId("room-name-input").value = "";
+        byId("room-name-input").reportValidity();
+        return;
+      }
+      const code = crypto.randomUUID();
+      const capacity = Number(byId("room-capacity-input").value);
+      openRoom(privateRoom(code, name, capacity));
+    });
+
+    byId("btn-copy-room").addEventListener("click", async () => {
+      const field = byId("room-link");
+      const status = byId("room-copy-status");
+      try {
+        await navigator.clipboard.writeText(field.value);
+        status.textContent = "Bağlantı kopyalandı.";
+      } catch {
+        field.focus();
+        field.select();
+        status.textContent = "Bağlantıyı seçili alandan kopyalayabilirsin.";
+      }
+    });
+
+    document.querySelectorAll("[data-feedback]").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("[data-feedback]").forEach((option) => {
+          option.setAttribute("aria-pressed", String(option === button));
+        });
+        byId("feedback-message").textContent = `Bu demo için seçimin: ${button.dataset.feedback}`;
+      });
+    });
 
     diceBtn.addEventListener("click", rollMyNick);
     btnStart.addEventListener("click", startSearching);
-
-    btnCancelSearch.addEventListener("click", () => {
-      goBackHome();
-    });
-
+    btnCancelSearch.addEventListener("click", goBackHome);
     btnNextTactic.addEventListener("click", showNextTactic);
-
-    btnMute.addEventListener("click", async () => {
-      isMuted = !isMuted;
-      btnMute.classList.toggle("muted", isMuted);
-      muteLabelEl.textContent = isMuted ? "Kapalı" : "Mikrofon";
-      if (!isMuted && !micReady) {
-        await initMicrophone();
-      }
-      updateCallStatus();
+    btnSkip.addEventListener("click", startSearching);
+    btnGoHome.addEventListener("click", goBackHome);
+    btnEndless.addEventListener("click", () => openCall(null));
+    byId("btn-extra").addEventListener("click", () => openCall(30));
+    byId("btn-repeat").addEventListener("click", () => {
+      showNextTactic();
+      openCall();
     });
+    btnRematch.addEventListener("click", startSearching);
+    byId("btn-end-home").addEventListener("click", goBackHome);
+    btnMute.addEventListener("click", toggleMicrophone);
+    roomMicButton.addEventListener("click", toggleMicrophone);
+    byId("btn-lobbies").addEventListener("click", openLobby);
+    byId("btn-lobby-home").addEventListener("click", goBackHome);
+    byId("btn-create-room").addEventListener("click", () => showScreen("create"));
+    byId("btn-create-back").addEventListener("click", openLobby);
+    byId("btn-leave-room").addEventListener("click", openLobby);
+    window.addEventListener("hashchange", openSharedRoom);
 
-    btnSkip.addEventListener("click", () => {
-      startSearching();
-    });
-
-    btnGoHome.addEventListener("click", () => {
-      goBackHome();
-    });
-
-    btnEndless.addEventListener("click", () => {
-      startEndlessReplyCountdown();
-    });
-
-    btnRematch.addEventListener("click", () => {
-      startSearching();
-    });
-
+    function renderOnlineCount() {
+      onlineCounts.forEach((element) => { element.textContent = `${onlineCount} kişi hatta`; });
+    }
     setInterval(() => {
-      const delta = Math.floor(Math.random() * 5) - 2;
-      onlineCount = Math.max(12, Math.min(140, onlineCount + delta));
-      updateOnlineCountDisplay();
+      onlineCount = Math.min(140, Math.max(12, onlineCount + Math.floor(Math.random() * 5) - 2));
+      renderOnlineCount();
     }, 4500);
 
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && callDeadline !== null) updateTimerDisplay();
+    });
+    window.addEventListener("pagehide", goBackHome);
+
     syncMyNickLabels();
-    tacticTextEl.textContent = TACTICS[tacticIndex];
-    updateOnlineCountDisplay();
+    rooms.forEach(addRoomCard);
+    renderOnlineCount();
+    openSharedRoom();
   </script>
 </body>
 </html>
